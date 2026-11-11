@@ -1,0 +1,98 @@
+from collections import deque
+
+# Goal state
+GOAL = (1, 2, 3,
+        4, 5, 6,
+        7, 8, 0)
+
+
+def print_puzzle(state):
+    for i in range(0, 9, 3):
+        print(state[i], state[i + 1], state[i + 2])
+    print()
+
+
+def get_neighbors(state):
+    neighbors = []
+
+    zero = state.index(0)
+    row = zero // 3
+    col = zero % 3
+
+    # Up
+    if row > 0:
+        new_state = list(state)
+        new_state[zero], new_state[zero - 3] = \
+            new_state[zero - 3], new_state[zero]
+        neighbors.append(tuple(new_state))
+
+    # Down
+    if row < 2:
+        new_state = list(state)
+        new_state[zero], new_state[zero + 3] = \
+            new_state[zero + 3], new_state[zero]
+        neighbors.append(tuple(new_state))
+
+    # Left
+    if col > 0:
+        new_state = list(state)
+        new_state[zero], new_state[zero - 1] = \
+            new_state[zero - 1], new_state[zero]
+        neighbors.append(tuple(new_state))
+
+    # Right
+    if col < 2:
+        new_state = list(state)
+        new_state[zero], new_state[zero + 1] = \
+            new_state[zero + 1], new_state[zero]
+        neighbors.append(tuple(new_state))
+
+    return neighbors
+
+
+def bfs(start):
+    queue = deque([start])
+    visited = {start: None}
+
+    while queue:
+        current = queue.popleft()
+
+        if current == GOAL:
+            path = []
+
+            while current is not None:
+                path.append(current)
+                current = visited[current]
+
+            return path[::-1]
+
+        for next_state in get_neighbors(current):
+            if next_state not in visited:
+                visited[next_state] = current
+                queue.append(next_state)
+
+    return None
+
+
+# Main program
+print("Enter the initial state row-wise:")
+print("Example: 1 2 3 4 0 6 7 5 8")
+
+start = tuple(map(int, input().split()))
+
+if len(start) != 9 or set(start) != set(range(9)):
+    print("Invalid input!")
+else:
+    solution = bfs(start)
+
+    if solution:
+        print("\nSolution:\n")
+
+        for step, state in enumerate(solution):
+            print("Step", step)
+            print_puzzle(state)
+
+        print("Puzzle solved!")
+        print("Number of moves:", len(solution) - 1)
+    else:
+        print("No solution exists.")
